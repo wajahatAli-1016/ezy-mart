@@ -1,4 +1,3 @@
-"use client"
 import styles from "../page.module.css"
 import logo from "../../../public/logo.png"
 import search from "../../../public/search.png"

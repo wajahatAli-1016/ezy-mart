@@ -1,6 +1,7 @@
 "use client";
 
 import Navbar from "./components/Navbar";
+import { Suspense } from "react";
 import styles from "./page.module.css"
 import banner from "../../public/banner.png"
 import filter from "../../public/filter.png"
@@ -10,7 +11,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import LoginModal from "./components/LoginModal";
 import { useAuth } from "./context/AuthContext.jsx";
 import Carousel from "./components/Carousel";
-const Home = () => {
+const HomeContent = () => {
 const [products, setProducts] = useState([])
 const [loading, setLoading] = useState(true)
 const [error, setError] = useState("")
@@ -69,7 +70,10 @@ const slides = [
 
   return (
     <div className={styles.container}>
-      <Navbar user={user} />
+       <Suspense fallback={<div>Loading navbar...</div>}>
+       <Navbar user={user} />
+      </Suspense>
+      
       <div className={styles.titles}>
         <h1 >Shop Smart, Live Better</h1>
         <p >Discover exclusive deals and trending products just for you.</p>
@@ -181,4 +185,10 @@ const slides = [
   )
 };
 
-export default Home;
+export default function Home() {
+  return (
+    <Suspense fallback={<div>Loading page...</div>}>
+      <HomeContent />
+    </Suspense>
+  );
+}
