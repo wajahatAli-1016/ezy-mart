@@ -1,0 +1,307 @@
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../context/AuthContext.jsx";
+import styles from "../page.module.css";
+
+export default function AdminPage() {
+  const router = useRouter();
+  const { user } = useAuth();
+  const [products, setProducts] = useState([]);
+  const [form, setForm] = useState({ name: "", description: "", price: "", stock: "", category: "", tags: "" });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [showProducts, setShowProducts] = useState(false)
+  const [showForm, setShowForm] = useState(false)
+  const [showOrders, setShowOrders] = useState(false)
+  const [editingProduct, setEditingProduct] = useState(null)
+  const [editForm, setEditForm] = useState({ name: "", description: "", price: "", stock: "", image: "", category: "", tags: "" })
+  const [editImageFile, setEditImageFile] = useState(null)
+  const [editImagePreview, setEditImagePreview] = useState(null)
+
+  // Guard: only allow specific admin user
+  useEffect(() => {
+    if (!user) {
+      router.replace("/");
+      return;
+    }
+    if (user.email !== "wajahataliq1224@gmail.com") {
+      router.replace("/");
+    }
+  }, [user, router]);
+
+  const fileToDataUrl = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+  // Fetch products and orders
+  useEffect(() => {
+    const loadAll = async () => {
+      try {
+        const [resP, resO] = await Promise.all([
+          fetch("/api/products"),
+          fetch("/api/orders"),
+        ]);
+        const [dataP, dataO] = await Promise.all([
+          resP.json().catch(() => []),
+          resO.json().catch(() => []),
+        ]);
+        setProducts(Array.isArray(dataP) ? dataP : []);
+        setOrders(Array.isArray(dataO) ? dataO : []);
+      } catch (err) {
+        setProducts([]);
+        setOrders([]);
+      }
+    };
+    loadAll();
+  }, []);
+
+  // Add new product
+  const addProduct = async (e) => {
+    e.preventDefault();
+    let imageDataUrl;
+    if (imageFile) {
+      try {
+        imageDataUrl = await fileToDataUrl(imageFile);
+      } catch (_) {
+        alert("Failed to read selected image");
+        return;
+      }
+    }
+    const res = await fetch("/api/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...form,
+        price: form.price === "" ? undefined : Number(form.price),
+        stock: form.stock === "" ? undefined : Number(form.stock),
+        image: imageDataUrl,
+      }),
+    });
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ message: "Unknown error" }));
+      alert(error.message || "Failed to add product");
+      return;
+    }
+    const newProduct = await res.json();
+    setProducts((prev) => [...(Array.isArray(prev) ? prev : []), newProduct]);
+    setForm({ name: "", description: "", price: "", stock: "", category: "", tags: "" });
+    setImageFile(null);
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+      setImagePreview(null);
+    }
+  };
+
+  // Delete product
+  const deleteProduct = async (id) => {
+    await fetch(`/api/products/${id}`, { method: "DELETE" });
+    setProducts((prev) => (Array.isArray(prev) ? prev.filter((p) => p._id !== id) : []));
+  };
+
+  // Open edit modal
+  const openEdit = (product) => {
+    setEditingProduct(product);
+    setEditForm({
+      name: product.name || "",
+      description: product.description || "",
+      price: product.price ?? "",
+      stock: product.stock ?? "",
+      image: product.image || "",
+      category: product.category || "",
+      tags: Array.isArray(product.tags) ? product.tags.join(", ") : (product.tags || ""),
+    });
+    setEditImageFile(null);
+    setEditImagePreview(product.image || null);
+  };
+
+  // Save edit
+  const saveEdit = async (e) => {
+    e?.preventDefault?.();
+    if (!editingProduct) return;
+    let imageDataUrl = editForm.image || "";
+    if (editImageFile) {
+      try {
+        imageDataUrl = await fileToDataUrl(editImageFile);
+      } catch (_) {
+        alert("Failed to read selected image");
+        return;
+      }
+    }
+    const res = await fetch(`/api/products/${editingProduct._id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: editForm.name,
+        description: editForm.description,
+        price: editForm.price === "" ? undefined : Number(editForm.price),
+        stock: editForm.stock === "" ? undefined : Number(editForm.stock),
+        image: imageDataUrl,
+        category: editForm.category,
+        tags: editForm.tags,
+      }),
+    });
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ message: "Unknown error" }));
+      alert(error.message || "Failed to update product");
+      return;
+    }
+    const updated = await res.json();
+    setProducts((prev) => prev.map((p) => (p._id === updated._id ? updated : p)));
+    setEditingProduct(null);
+    setEditImageFile(null);
+    if (editImagePreview) URL.revokeObjectURL?.(editImagePreview);
+    setEditImagePreview(null);
+  };
+
+  return (
+    <div className={styles.adminContainer}>
+      <h1>Admin Dashboard</h1>
+      <div className={styles.adminGrid}>
+        <div className={styles.adminCard}>
+          <div className={styles.adminCardHeader}>Add New Product</div>
+          <div className={styles.adminCardBody}>
+            <form onSubmit={addProduct} className={styles.adminForm}>
+              <input className={styles.adminInput} placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <input className={styles.adminInput} placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+              <input className={styles.adminInput} type="number" placeholder="Price" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+              <input className={styles.adminInput} type="number" placeholder="Stock" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
+              <input className={styles.adminInput} placeholder="Category (e.g., shoes)" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+              <input className={styles.adminInput} placeholder="Tags (comma separated)" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
+              <input className={styles.adminFile}
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  setImageFile(file);
+                  if (imagePreview) URL.revokeObjectURL(imagePreview);
+                  setImagePreview(file ? URL.createObjectURL(file) : null);
+                }}
+              />
+              {imagePreview && (
+                <img src={imagePreview} alt="Selected preview" className={styles.adminThumb} />
+              )}
+              <button type="submit" className={styles.adminButton}>Add Product</button>
+            </form>
+          </div>
+        </div>
+
+        <div className={styles.adminCard}>
+          <div className={styles.adminCardHeader}>Orders</div>
+          <div className={styles.adminCardBody}>
+            <table className={styles.adminTable}>
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders.map((o) => (
+                  <tr key={o._id}>
+                    <td>#{o._id.slice(-6)}</td>
+                    <td>${o.totalAmount}</td>
+                    <td>
+                      <select
+                        className={styles.adminSelect}
+                        defaultValue={o.status}
+                        onChange={async (e) => {
+                          const status = e.target.value;
+                          await fetch(`/api/orders/${o._id}`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ status }),
+                          });
+                          setOrders((prev) => prev.map((oo) => (oo._id === o._id ? { ...oo, status } : oo)));
+                        }}
+                      >
+                        <option>Pending</option>
+                        <option>Processing</option>
+                        <option>Shipped</option>
+                        <option>Delivered</option>
+                        <option>Cancelled</option>
+                      </select>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.adminCard}>
+        <div className={styles.adminCardHeader}>Products</div>
+        <div className={styles.adminCardBody}>
+          <table className={styles.adminTable}>
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Tags</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((p) => (
+                <tr key={p._id}>
+                  <td>{p.image && <img src={p.image} alt={p.name} className={styles.adminThumb} />}</td>
+                  <td>{p.name}</td>
+                  <td>{p.category || "-"}</td>
+                  <td>${p.price}</td>
+                  <td>{p.stock}</td>
+                  <td>{Array.isArray(p.tags) ? p.tags.join(", ") : (p.tags || "-")}</td>
+                  <td>
+                    <button className={styles.adminButton} onClick={() => openEdit(p)} style={{ marginRight: 8 }}>Edit</button>
+                    <button className={styles.adminButton} onClick={() => deleteProduct(p._id)}>Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {editingProduct && (
+        <div className={styles.modalBackdrop}>
+          <div className={styles.modalCard}>
+            <h3>Edit Product</h3>
+            <form onSubmit={saveEdit} className={styles.modalForm}>
+              <input className={styles.adminInput} placeholder="Name" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+              <input className={styles.adminInput} placeholder="Description" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
+              <input className={styles.adminInput} type="number" placeholder="Price" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: e.target.value })} />
+              <input className={styles.adminInput} type="number" placeholder="Stock" value={editForm.stock} onChange={(e) => setEditForm({ ...editForm, stock: e.target.value })} />
+              <input className={styles.adminInput} placeholder="Category" value={editForm.category} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })} />
+              <input className={styles.adminInput} placeholder="Tags (comma separated)" value={editForm.tags} onChange={(e) => setEditForm({ ...editForm, tags: e.target.value })} />
+              <input
+                className={styles.adminFile}
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  setEditImageFile(file);
+                  setEditImagePreview(file ? URL.createObjectURL(file) : editForm.image || null);
+                }}
+              />
+              {editImagePreview && (
+                <img src={editImagePreview} alt="Preview" className={styles.adminThumb} />
+              )}
+              <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+                <button type="submit" className={styles.adminButton}>Save</button>
+                <button type="button" onClick={() => { setEditingProduct(null); setEditImageFile(null); if (editImagePreview) URL.revokeObjectURL?.(editImagePreview); setEditImagePreview(null); }} className={styles.adminButton}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
