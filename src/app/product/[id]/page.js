@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext.jsx";
 import PaymentModal from "../../components/PaymentModal.jsx";
 import Navbar from "@/app/components/Navbar";
+import Footer from "@/app/components/Footer";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -44,7 +45,10 @@ const [payOpen, setPayOpen] = useState(false);
   return (
     <div className={styles.productDetails}>
       <Navbar/>
-      <div className={styles.pCard} style={{ width: 1000, height: 600, marginLeft: 100 }}>
+      <div className={styles.pName}>
+      <h1>{product.name}</h1>
+      </div>
+      <div className={styles.pCard} >
         <div className={styles.imageWrapper} style={{ height: 320 }}>
           {product.image && <img src={product.image} alt={product.name} className={styles.image} />}
         </div>
@@ -73,6 +77,7 @@ const [payOpen, setPayOpen] = useState(false);
         onClose={() => setPayOpen(false)}
         product={product}
       />
+      <Footer/>
     </div>
   );
 }

@@ -158,7 +158,6 @@ export default function AdminPage() {
     if (editImagePreview) URL.revokeObjectURL?.(editImagePreview);
     setEditImagePreview(null);
   };
-
   return (
     <div className={styles.adminContainer}>
       <h1>Admin Dashboard</h1>
@@ -197,6 +196,7 @@ export default function AdminPage() {
             <table className={styles.adminTable}>
               <thead>
                 <tr>
+                  <th>User ID</th>
                   <th>Order</th>
                   <th>Total</th>
                   <th>Status</th>
@@ -205,6 +205,7 @@ export default function AdminPage() {
               <tbody>
                 {orders.map((o) => (
                   <tr key={o._id}>
+                    <td>{o.user}</td>
                     <td>#{o._id.slice(-6)}</td>
                     <td>${o.totalAmount}</td>
                     <td>

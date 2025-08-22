@@ -103,9 +103,9 @@ const Navbar = ({user}) => {
 
             <ul className={`${styles.items} ${mobileMenuOpen ? styles.mobileMenuOpen : ""}`}>
                 <img src={logo.src} alt="logo" className={styles.logo}/>
-                <li onClick={closeMobileMenu}>Home</li>
-                <li onClick={closeMobileMenu}>About</li>
-                <li onClick={closeMobileMenu}>Contact</li>
+                <Link href="/" onClick={closeMobileMenu}>Home</Link>
+                <Link href = "/orders" onClick={closeMobileMenu}>Orders</Link>
+                <Link href="/contact" onClick={closeMobileMenu}>Contact</Link>
                 {effectiveUser ? (
                   <>
                     {effectiveUser?.email === "wajahataliq1224@gmail.com" && <Link href="/admin" onClick={closeMobileMenu}>Admin</Link>}
