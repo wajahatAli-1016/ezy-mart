@@ -2,11 +2,14 @@
 import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
 import styles from '../page.module.css';
+import { Suspense } from "react";
 
 const Contact = () =>{
     return(
         <div className={styles.container}>
+            <Suspense>
             <Navbar/>
+            </Suspense>
             <div className={styles.contactPage}>
       <div className={styles.contactContainer}>
         <h1>Contact Us</h1>
