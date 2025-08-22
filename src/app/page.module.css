@@ -203,7 +203,7 @@ z-index: -1;
   box-shadow: 0 6px 20px rgba(0,0,0,0.3);
   border: 1px solid #eee;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
-  width:250px;
+  width:280px;
 }
 .pCard{
   background: #fff;
