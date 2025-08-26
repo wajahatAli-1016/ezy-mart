@@ -345,7 +345,8 @@ z-index: -1;
 
 /* Admin Dashboard */
 .adminContainer {
-  background: radial-gradient(#ffffff, #66FFC7, #ffffff);
+  background: radial-gradient(#ffffff, #f7d9ac, #ffffff);
+
 
   width: 100%;
   margin: 0px auto 60px;
@@ -371,9 +372,9 @@ z-index: -1;
 .adminCardHeader {
   padding: 16px 18px;
   border-bottom: 1px solid #f1f5f9;
-  background-color: rgb(139, 206, 139);
+  background:#9c5c31;
+color: white;
 
-  color: #0f172a;
   font-weight: 700;
 }
 
