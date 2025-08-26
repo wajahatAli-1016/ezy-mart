@@ -8,6 +8,7 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import PaymentModal from "../../components/PaymentModal.jsx";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
+import logo from "../../../../public/logo.png"
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -38,7 +39,10 @@ const [payOpen, setPayOpen] = useState(false);
     load();
   }, [id]);
 
-  if (loading) return <div className={styles.productsSection}><p>Loading...</p></div>;
+  if (loading) return (<div className={styles.loaderContainer + " " + styles.full}>
+  <img src={logo.src} alt="Car" className={styles.loader} />
+  <h3>loading product...</h3>
+  </div>);
   if (error) return <div className={styles.productsSection}><p>{error}</p></div>;
   if (!product) return null;
 

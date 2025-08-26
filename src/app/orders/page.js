@@ -5,6 +5,7 @@ import styles from "../page.module.css";
 import { useAuth } from "../context/AuthContext.jsx";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import logo from "../../../public/logo.png"
 
 export default function OrdersPage() {
   const { user } = useAuth();
@@ -31,7 +32,10 @@ export default function OrdersPage() {
   }, [user]);
 
   if (!user) return <div className={styles.productsSection}><p>Please login to view your orders.</p></div>;
-  if (loading) return <div className={styles.productsSection}><p>Loading...</p></div>;
+  if (loading) return <div className={styles.loaderContainer + " " + styles.full}>
+  <img src={logo.src} alt="Car" className={styles.loader} />
+  <h3>Loading orders...</h3>
+  </div>;
   if (error) return <div className={styles.productsSection}><p>{error}</p></div>;
 
   return (

@@ -12,6 +12,7 @@ import LoginModal from "./components/LoginModal";
 import { useAuth } from "./context/AuthContext.jsx";
 import Carousel from "./components/Carousel";
 import Footer from "./components/Footer";
+import logo from "../../public/logo.png"
 const HomeContent = () => {
 const [products, setProducts] = useState([])
 const [loading, setLoading] = useState(true)
@@ -84,6 +85,7 @@ const slides = [
       <div className={styles.bannerContainer}>
      <Carousel images={slides} />
       </div>
+
       <div className={styles.filter}>
         <h2 className={styles.text}>Our Products</h2>
         <select
@@ -99,7 +101,11 @@ const slides = [
         </select>
       </div>
       <div className={styles.productsSection}>
-        {loading && <p>Loading products...</p>}
+        {loading && <div className={styles.loaderContainer}>
+          <img src={logo.src} alt="Car" className={styles.loader} />
+          <h3>Loading products...</h3>
+          </div>
+        }
         {!loading && error && <p>{error}</p>}
         {!loading && !error && products.length === 0 && <p>No products found.</p>}
         {!loading && !error && (

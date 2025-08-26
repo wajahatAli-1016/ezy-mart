@@ -126,7 +126,7 @@ const Navbar = ({user}) => {
                 />
                 <img src={search.src} alt="search" className={styles.searchIcon} onClick={performSearch}/>
                 {!effectiveUser?
-                  <img src={avatar.src} className={styles.login}/>:
+                  <img src={avatar.src} className={styles.avatar}/>:
                   <div className={styles.user}>{firstLetter}</div>
                         
                       }
