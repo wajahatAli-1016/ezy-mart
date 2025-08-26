@@ -1,5 +1,5 @@
 .container{
-  background: radial-gradient(#ffffff, #66FFC7, #ffffff);
+  background: radial-gradient(#ffffff, #f7d9ac, #ffffff);
  
 z-index: -1;
   width: 100%;
@@ -49,7 +49,8 @@ z-index: -1;
   display: flex;
 }
 .nav.scrolled {
-  background: linear-gradient(to right,#ffffff, #66FFC7, #ffffff);
+  background: linear-gradient(to right,#ffffff, #f7d9ac, #ffffff);
+
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(500px);
 }
@@ -60,7 +61,8 @@ margin: 60px auto 60px;
 overflow-y: hidden;
 }
 .pContainer{
-  background: radial-gradient(#ffffff, #66FFC7, #ffffff);
+  background: radial-gradient(#ffffff, #f7d9ac, #ffffff);
+
 z-index: -1;
   width: 100%;
   min-height: 100vh;
@@ -174,8 +176,7 @@ z-index: -1;
   display: flex;
   justify-content: center;
   flex-direction: column;
-  background: radial-gradient(#ffffff, #66FFC7, #ffffff);
-  
+  background: radial-gradient(#ffffff, #f7d9ac, #ffffff);  
   width: 100%;
   min-height: 100vh;
   padding-top: 80px;
@@ -574,7 +575,8 @@ z-index: -1;
     max-width: 320px;
     height: 100vh;
     /* background: linear-gradient(to right, #ffffff, #66FFC7, #ffffff); */
-    background-color: white;
+    background: linear-gradient(to left,#ffffff, #f7d9ac);
+
 
     flex-direction: column;
     justify-content: flex-start;
