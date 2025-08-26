@@ -280,7 +280,7 @@ z-index: -1;
   width: 100%;
   padding: 10px;
   border-radius: 8px;
-  background: rgb(53, 177, 80);
+  background:#9c5c31;
   color: #fff;
   font-weight: 500;
   border: none;
@@ -289,7 +289,7 @@ z-index: -1;
 }
 
 .buyBtn:hover {
-  background: #15803d;
+  background: #b8470b;
 }
 
 .disabled {
