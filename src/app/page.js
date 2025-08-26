@@ -3,7 +3,6 @@
 import Navbar from "./components/Navbar";
 import { Suspense } from "react";
 import styles from "./page.module.css"
-import banner from "../../public/banner.png"
 import filter from "../../public/filter.png"
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -24,9 +23,10 @@ const searchParams = useSearchParams()
 const { user } = useAuth()
 
 const slides = [
-  "/banner.png",
+  "/banner1.png",
   "/banner2.png",
   "/banner3.png",
+  "/banner4.png"
 ];
 
 
