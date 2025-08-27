@@ -167,10 +167,10 @@ const HomeContent = () => {
                         if (!user) {
                           setPendingProductId(p._id);
                           setLoginOpen(true);
-                          handleAddToCart(p)
                           return;
                         }
-                        router.push(`/product/${p._id}`);
+                        handleAddToCart(p)
+
                       }}
                       disabled={p.stock === 0}
                     >
