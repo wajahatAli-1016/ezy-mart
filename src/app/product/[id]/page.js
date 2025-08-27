@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import styles from "../../page.module.css";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useCart } from "../../context/CartContext.js";
 import PaymentModal from "../../components/PaymentModal.jsx";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
@@ -18,7 +19,9 @@ export default function ProductDetailPage() {
   const [error, setError] = useState("");
 const router = useRouter();
 const { user } = useAuth();
+const { addToCart } = useCart();
 const [payOpen, setPayOpen] = useState(false);
+const [addedToCart, setAddedToCart] = useState(false);
 
 
   useEffect(() => {
@@ -53,27 +56,51 @@ const [payOpen, setPayOpen] = useState(false);
       <h1>{product.name}</h1>
       </div>
       <div className={styles.pCard} >
-        <div className={styles.imageWrapper} style={{ height: 320 }}>
+        <div className={styles.imageWrapper} style={{ height: 320}}>
           {product.image && <img src={product.image} alt={product.name} className={styles.image} />}
         </div>
         <div className={styles.content}>
           <h2 className={styles.name}>{product.name}</h2>
-          <p className={styles.price}>${product.price}</p>
+          <div className={styles.priceContainer}>
+            {product.isOnSale ? (
+              <>
+                <span className={styles.originalPrice}>${product.price}</span>
+                <span className={styles.salePrice}>${product.salePrice}</span>
+                <span className={styles.saleBadge}>{product.salePercentage}% OFF</span>
+              </>
+            ) : (
+              <p className={styles.price}>${product.price}</p>
+            )}
+          </div>
           <p className={`${styles.stock} ${product.stock > 0 ? styles.inStock : styles.outStock}`}>
             {product.stock > 0 ? "In stock" : "Out of stock"}
           </p>
           <p>{product.description}</p>
-          <button
-            className={`${styles.buyBtn} ${product.stock === 0 ? styles.disabled : ""}`}
-            style={{ marginTop: 30 }}
-            disabled={product.stock === 0}
-            onClick={() => {
-              if (!user) return;
-              setPayOpen(true);
-            }}
-          >
-            Pay Now
-          </button>
+          <div className={styles.btn}>
+            <button
+              className={`${styles.buyBtn} ${product.stock === 0 ? styles.disabled : ""}`}
+              style={{ marginTop: 30 }}
+              disabled={product.stock === 0}
+              onClick={() => {
+                if (!user) return;
+                setPayOpen(true);
+              }}
+            >
+              Pay Now
+            </button>
+            <button
+              className={`${styles.cartBtn} ${addedToCart ? styles.addedToCart : ""}`}
+              style={{ marginTop: 30 }}
+              disabled={product.stock === 0}
+              onClick={() => {
+                addToCart(product);
+                setAddedToCart(true);
+                setTimeout(() => setAddedToCart(false), 2000);
+              }}
+            >
+              {addedToCart ? 'Added!' : 'Add to Cart'}
+            </button>
+          </div>
         </div>
       </div>
       <PaymentModal

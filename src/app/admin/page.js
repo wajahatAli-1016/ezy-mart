@@ -19,6 +19,9 @@ export default function AdminPage() {
   const [editForm, setEditForm] = useState({ name: "", description: "", price: "", stock: "", image: "", category: "", tags: "" })
   const [editImageFile, setEditImageFile] = useState(null)
   const [editImagePreview, setEditImagePreview] = useState(null)
+  const [saleModal, setSaleModal] = useState(null)
+  const [saleForm, setSaleForm] = useState({ salePercentage: "", saleEndDate: "" })
+  const [saleMessage, setSaleMessage] = useState("")
 
   // Guard: only allow specific admin user
   useEffect(() => {
@@ -158,9 +161,94 @@ export default function AdminPage() {
     if (editImagePreview) URL.revokeObjectURL?.(editImagePreview);
     setEditImagePreview(null);
   };
+
+  // Open sale modal
+  const openSaleModal = (product) => {
+    setSaleModal(product);
+    setSaleForm({
+      salePercentage: product.salePercentage || "",
+      saleEndDate: product.saleEndDate ? new Date(product.saleEndDate).toISOString().split('T')[0] : ""
+    });
+  };
+
+  // Apply sale
+  const applySale = async (e) => {
+    e.preventDefault();
+    if (!saleModal) return;
+
+    // Validation
+    if (!saleForm.salePercentage || saleForm.salePercentage < 1 || saleForm.salePercentage > 100) {
+      alert("Please enter a valid sale percentage between 1 and 100");
+      return;
+    }
+
+    if (!saleForm.saleEndDate) {
+      alert("Please select a sale end date");
+      return;
+    }
+
+    const endDate = new Date(saleForm.saleEndDate);
+    if (endDate <= new Date()) {
+      alert("Sale end date must be in the future");
+      return;
+    }
+
+    const res = await fetch("/api/products/sale", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        productId: saleModal._id,
+        salePercentage: Number(saleForm.salePercentage),
+        saleEndDate: saleForm.saleEndDate,
+      }),
+    });
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ message: "Unknown error" }));
+      alert(error.message || "Failed to apply sale");
+      return;
+    }
+
+    const updated = await res.json();
+    setProducts((prev) => prev.map((p) => (p._id === updated._id ? updated : p)));
+    setSaleModal(null);
+    setSaleForm({ salePercentage: "", saleEndDate: "" });
+    setSaleMessage("Sale applied successfully!");
+    setTimeout(() => setSaleMessage(""), 3000);
+  };
+
+  // Remove sale
+  const removeSale = async (productId) => {
+    const res = await fetch("/api/products/sale", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        productId: productId,
+        salePercentage: 0,
+        saleEndDate: new Date().toISOString(),
+      }),
+    });
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ message: "Unknown error" }));
+      alert(error.message || "Failed to remove sale");
+      return;
+    }
+
+    const updated = await res.json();
+    setProducts((prev) => prev.map((p) => (p._id === updated._id ? updated : p)));
+    setSaleMessage("Sale removed successfully!");
+    setTimeout(() => setSaleMessage(""), 3000);
+  };
+
   return (
     <div className={styles.adminContainer}>
       <h1>Admin Dashboard</h1>
+      {saleMessage && (
+        <div className={styles.successMessage}>
+          {saleMessage}
+        </div>
+      )}
       <div className={styles.adminGrid}>
         <div className={styles.adminCard}>
           <div className={styles.adminCardHeader}>Add New Product</div>
@@ -247,6 +335,7 @@ export default function AdminPage() {
                 <th>Name</th>
                 <th>Category</th>
                 <th>Price</th>
+                <th>Sale</th>
                 <th>Stock</th>
                 <th>Tags</th>
                 <th>Action</th>
@@ -259,10 +348,39 @@ export default function AdminPage() {
                   <td>{p.name}</td>
                   <td>{p.category || "-"}</td>
                   <td>${p.price}</td>
+                  <td>
+                    {p.isOnSale ? (
+                      <div className={styles.saleInfo}>
+                        <div className={styles.salePercentage}>
+                          {p.salePercentage}% OFF
+                        </div>
+                        <div className={styles.salePrice}>
+                          ${p.salePrice}
+                        </div>
+                        <div className={styles.saleEndDate}>
+                          Ends: {new Date(p.saleEndDate).toLocaleDateString()}
+                        </div>
+                      </div>
+                    ) : (
+                      "No Sale"
+                    )}
+                  </td>
                   <td>{p.stock}</td>
                   <td>{Array.isArray(p.tags) ? p.tags.join(", ") : (p.tags || "-")}</td>
                   <td>
-                    <button className={styles.adminButton} onClick={() => openEdit(p)} style={{ marginRight: 8 }}>Edit</button>
+                    <button className={styles.adminButton} onClick={() => openEdit(p)} style={{ marginRight: 8, marginBottom: 4 }}>Edit</button>
+                    <button className={styles.adminButton} onClick={() => openSaleModal(p)} style={{ marginRight: 8, marginBottom: 4 }}>
+                      {p.isOnSale ? "Edit Sale" : "Apply Sale"}
+                    </button>
+                    {p.isOnSale && (
+                      <button 
+                        className={styles.adminButton} 
+                        onClick={() => removeSale(p._id)}
+                        style={{ marginRight: 8, marginBottom: 4, backgroundColor: '#dc3545' }}
+                      >
+                        Remove Sale
+                      </button>
+                    )}
                     <button className={styles.adminButton} onClick={() => deleteProduct(p._id)}>Delete</button>
                   </td>
                 </tr>
@@ -271,6 +389,8 @@ export default function AdminPage() {
           </table>
         </div>
       </div>
+
+      {/* Edit Product Modal */}
       {editingProduct && (
         <div className={styles.modalBackdrop}>
           <div className={styles.modalCard}>
@@ -298,6 +418,46 @@ export default function AdminPage() {
               <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
                 <button type="submit" className={styles.adminButton}>Save</button>
                 <button type="button" onClick={() => { setEditingProduct(null); setEditImageFile(null); if (editImagePreview) URL.revokeObjectURL?.(editImagePreview); setEditImagePreview(null); }} className={styles.adminButton}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Sale Modal */}
+      {saleModal && (
+        <div className={styles.modalBackdrop}>
+          <div className={styles.modalCard}>
+            <h3>Apply Sale - {saleModal.name}</h3>
+            <form onSubmit={applySale} className={styles.modalForm}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                  Sale Percentage (%)
+                </label>
+                <input 
+                  className={styles.adminInput} 
+                  type="number" 
+                  min="1" 
+                  max="100"
+                  placeholder="Enter percentage (1-100)" 
+                  value={saleForm.salePercentage} 
+                  onChange={(e) => setSaleForm({ ...saleForm, salePercentage: e.target.value })} 
+                />
+              </div>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                  Sale End Date
+                </label>
+                <input 
+                  className={styles.adminInput} 
+                  type="date" 
+                  value={saleForm.saleEndDate} 
+                  onChange={(e) => setSaleForm({ ...saleForm, saleEndDate: e.target.value })} 
+                />
+              </div>
+              <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+                <button type="submit" className={styles.adminButton}>Apply Sale</button>
+                <button type="button" onClick={() => { setSaleModal(null); setSaleForm({ salePercentage: "", saleEndDate: "" }); }} className={styles.adminButton}>Cancel</button>
               </div>
             </form>
           </div>

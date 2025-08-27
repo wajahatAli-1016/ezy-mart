@@ -6,8 +6,11 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useAuth } from "../context/AuthContext.jsx"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useCart } from "../context/CartContext.js"
+import cart from '../../../public/cart.png'
 const Navbar = ({user}) => {
     const { user: authUser, logout } = useAuth();
+    const { getTotalItems } = useCart();
     const effectiveUser = user || authUser || null;
     const [scrolled, setScrolled] = useState(false);
     const [searchText, setSearchText] = useState("");
@@ -125,6 +128,17 @@ const Navbar = ({user}) => {
                   onKeyDown={(e) => { if (e.key === "Enter") performSearch(); }}
                 />
                 <img src={search.src} alt="search" className={styles.searchIcon} onClick={performSearch}/>
+                
+                {/* Cart Icon */}
+                {effectiveUser?
+                <Link href="/cart" className={styles.cartIcon}>
+                  <img src={cart.src} className={styles.cart}/>
+                  {getTotalItems() > 0 && (
+                    <span className={styles.cartBadge}>{getTotalItems()}</span>
+                  )}
+                </Link>:""
+                }
+                
                 {!effectiveUser?
                   <img src={avatar.src} className={styles.avatar}/>:
                   <div className={styles.user}>{firstLetter}</div>

@@ -29,11 +29,11 @@ const PaymentModal = ({ open, onClose, product }) => {
             product: product._id,
             name: product.name,
             image: product.image,
-            price: product.price,
+            price: product.isOnSale ? product.salePrice : product.price,
             quantity: 1,
           },
         ],
-        totalAmount: product.price,
+        totalAmount: product.isOnSale ? product.salePrice : product.price,
       };
       const res = await fetch("/api/orders", {
         method: "POST",
