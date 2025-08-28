@@ -64,6 +64,17 @@ export default function AdminPage() {
       }
     };
     loadAll();
+    // Poll orders so payment status reflects webhook updates
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch("/api/orders", { cache: "no-store" });
+        const data = await res.json().catch(() => []);
+        if (Array.isArray(data)) setOrders(data);
+      } catch (_) {
+        // ignore polling errors
+      }
+    }, 8000);
+    return () => clearInterval(interval);
   }, []);
 
   // Add new product
@@ -292,6 +303,7 @@ export default function AdminPage() {
                   <th>Order</th>
                   <th>Total</th>
                   <th>Status</th>
+                  <th>Payment</th>
                 </tr>
               </thead>
               <tbody>
@@ -319,7 +331,15 @@ export default function AdminPage() {
                         <option>Shipped</option>
                         <option>Delivered</option>
                         <option>Cancelled</option>
+                        <option>Paid</option>
                       </select>
+                    </td>
+                    <td>
+                      {o.status === "Paid" ? (
+                        <span style={{ color: '#16a34a', fontWeight: 600 }}>Paid</span>
+                      ) : (
+                        <span style={{ color: '#dc2626', fontWeight: 600 }}>Unpaid</span>
+                      )}
                     </td>
                   </tr>
                 ))}

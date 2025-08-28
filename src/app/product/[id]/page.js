@@ -60,10 +60,36 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 
   const handleCheckout = async () => {
     try {
+      // 1) Create an order in DB
+      const totalAmount = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+      const orderRes = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user?._id || user?.id,
+          items: [
+            {
+              product: product._id,
+              name: product.name,
+              image: product.image,
+              price: items[0].price,
+              quantity: items[0].quantity,
+            },
+          ],
+          totalAmount,
+        }),
+      });
+      if (!orderRes.ok) {
+        const err = await orderRes.json().catch(() => ({}));
+        throw new Error(err.message || "Failed to create order");
+      }
+      const order = await orderRes.json();
+
+      // 2) Create Stripe Checkout Session with metadata.orderId
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items }),
+        body: JSON.stringify({ items, orderId: order._id }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Checkout failed");

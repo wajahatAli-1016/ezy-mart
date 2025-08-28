@@ -42,7 +42,7 @@ export default function OrdersPage() {
     <div className={styles.container}>
       <Navbar/>
       <div className={styles.order}>
-        <h2>Your Orders</h2>
+        <h2 className={styles.adminHeading}>Your Orders</h2>
         {orders.length === 0 && <p>No orders yet.</p>}
         <table
           style={{

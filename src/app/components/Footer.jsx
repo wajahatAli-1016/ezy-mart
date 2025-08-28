@@ -1,11 +1,11 @@
 import Link from "next/link";
 import styles from "../page.module.css"
 const Footer = () => {
+  
     return(
-
         <footer className={styles.footer}>
         <div className={styles.footerContainer}>
-          
+      
           {/* Brand / Logo */}
           <div className={styles.brand}>
             <h2>Ezy-<span>Mart</span></h2>
@@ -34,7 +34,7 @@ const Footer = () => {
   
         {/* Bottom Bar */}
         <div className={styles.bottom}>
-          <p>© {new Date().getFullYear()} ShopZone. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Ezy-Mart. All rights reserved.</p>
         </div>
       </footer>
     

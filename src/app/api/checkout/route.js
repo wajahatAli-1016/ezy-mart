@@ -5,7 +5,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req) {
   try {
-    const { items } = await req.json();
+    const { items, orderId } = await req.json();
 
     // build line items
     const line_items = items.map((item) => ({
@@ -24,6 +24,8 @@ export async function POST(req) {
       mode: "payment",
       success_url: `${req.headers.get("origin")}/success`,
       cancel_url: `${req.headers.get("origin")}/cancel`,
+      metadata: orderId ? { orderId } : undefined,
+      payment_intent_data: orderId ? { metadata: { orderId } } : undefined,
     });
 
     return NextResponse.json({ url: session.url });
