@@ -1012,3 +1012,17 @@ color: white;
 @keyframes fadeOut {
   to { opacity: 0; visibility: hidden; }
 } 
+.message{
+  height: 100vh;
+  background: linear-gradient(to right,#ffffff, #f7d9ac, #ffffff);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.cancelMessage{
+  background-color: rgb(241, 67, 67);
+  color: white;
+  padding:10px;
+  border-radius: 10px;
+}
