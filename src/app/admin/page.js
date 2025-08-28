@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext.jsx";
 import styles from "../page.module.css";
+import Navbar from "../components/Navbar.jsx";
+import Footer from "../components/Footer.jsx";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -242,8 +244,10 @@ export default function AdminPage() {
   };
 
   return (
-    <div className={styles.adminContainer}>
-      <h1>Admin Dashboard</h1>
+    <div className={styles.admin}>
+      <Navbar />
+      <div className={styles.adminContainer}>
+      <h1 className={styles.adminHeading}>Admin Dashboard</h1>
       {saleMessage && (
         <div className={styles.successMessage}>
           {saleMessage}
@@ -373,8 +377,8 @@ export default function AdminPage() {
                       {p.isOnSale ? "Edit Sale" : "Apply Sale"}
                     </button>
                     {p.isOnSale && (
-                      <button 
-                        className={styles.adminButton} 
+                      <button
+                        className={styles.adminButton}
                         onClick={() => removeSale(p._id)}
                         style={{ marginRight: 8, marginBottom: 4, backgroundColor: '#dc3545' }}
                       >
@@ -434,25 +438,25 @@ export default function AdminPage() {
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
                   Sale Percentage (%)
                 </label>
-                <input 
-                  className={styles.adminInput} 
-                  type="number" 
-                  min="1" 
+                <input
+                  className={styles.adminInput}
+                  type="number"
+                  min="1"
                   max="100"
-                  placeholder="Enter percentage (1-100)" 
-                  value={saleForm.salePercentage} 
-                  onChange={(e) => setSaleForm({ ...saleForm, salePercentage: e.target.value })} 
+                  placeholder="Enter percentage (1-100)"
+                  value={saleForm.salePercentage}
+                  onChange={(e) => setSaleForm({ ...saleForm, salePercentage: e.target.value })}
                 />
               </div>
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
                   Sale End Date
                 </label>
-                <input 
-                  className={styles.adminInput} 
-                  type="date" 
-                  value={saleForm.saleEndDate} 
-                  onChange={(e) => setSaleForm({ ...saleForm, saleEndDate: e.target.value })} 
+                <input
+                  className={styles.adminInput}
+                  type="date"
+                  value={saleForm.saleEndDate}
+                  onChange={(e) => setSaleForm({ ...saleForm, saleEndDate: e.target.value })}
                 />
               </div>
               <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
@@ -463,6 +467,8 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+      </div>
+      <Footer/>
     </div>
   );
 }

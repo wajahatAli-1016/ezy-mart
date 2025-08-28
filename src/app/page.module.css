@@ -57,7 +57,10 @@ z-index: -1;
 .order{
 
 width: 80%;
-margin: 60px auto 60px;
+/* margin: 60px auto 60px; */
+margin-left: 150px;
+margin-top: 20px;
+height: 100vh;
 overflow-y: hidden;
 }
 .pContainer{
@@ -503,14 +506,29 @@ z-index: -1;
 
 /* Admin Dashboard */
 .adminContainer {
-  background: radial-gradient(#ffffff, #f7d9ac, #ffffff);
-
-
+  /* background: radial-gradient(#ffffff, #f7d9ac, #ffffff); */
   width: 100%;
   margin: 0px auto 60px;
   display: grid;
   grid-template-columns: 1fr;
   gap: 20px;
+  margin-top: 70px;
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-top: 30px;
+}
+.admin{
+  background: radial-gradient(#ffffff, #f7d9ac, #ffffff);
+  width: 100%;
+  /* margin: 0px auto 60px; */
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+.adminHeading{
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .adminGrid {
@@ -525,6 +543,7 @@ z-index: -1;
   border-radius: 14px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
   overflow: hidden;
+  margin-top: 20px;
 }
 
 .adminCardHeader {
@@ -887,8 +906,8 @@ color: white;
   margin: 0;
   padding: 0;
   font-family: "Poppins", sans-serif;
-  background: radial-gradient(#ffffff, #66ffc7, #ffffff);
-  min-height: 100vh;
+  background: radial-gradient(#ffffff, #f7d9ac, #ffffff);
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -903,6 +922,7 @@ color: white;
   padding: 40px;
   max-width: 500px;
   width: 100%;
+  margin-top: 100px;
   text-align: center;
   animation: fadeIn 1s ease-in-out;
 }
