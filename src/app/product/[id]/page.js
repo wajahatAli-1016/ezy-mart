@@ -10,6 +10,7 @@ import PaymentModal from "../../components/PaymentModal.jsx";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import logo from "../../../../public/logo.png"
+import {loadStripe} from "@stripe/stripe-js"
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -22,6 +23,7 @@ const { user } = useAuth();
 const { addToCart } = useCart();
 const [payOpen, setPayOpen] = useState(false);
 const [addedToCart, setAddedToCart] = useState(false);
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 
   useEffect(() => {
@@ -48,7 +50,40 @@ const [addedToCart, setAddedToCart] = useState(false);
   </div>);
   if (error) return <div className={styles.productsSection}><p>{error}</p></div>;
   if (!product) return null;
+  const items = [
+    {
+      name: product.name,
+      price: product.isOnSale ? product.salePrice : product.price,
+      quantity: 1,
+    }
+  ];
 
+  const handleCheckout = async () => {
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Checkout failed");
+
+      if (data?.url) {
+        window.location.href = data.url;
+        return;
+      }
+
+      if (data?.id) {
+        const stripe = await stripePromise;
+        await stripe.redirectToCheckout({ sessionId: data.id });
+        return;
+      }
+
+      throw new Error("Invalid checkout response");
+    } catch (e) {
+      alert(e.message || "Unable to start checkout");
+    }
+  };
   return (
     <div className={styles.productDetails}>
       <Navbar/>
@@ -83,7 +118,7 @@ const [addedToCart, setAddedToCart] = useState(false);
               disabled={product.stock === 0}
               onClick={() => {
                 if (!user) return;
-                setPayOpen(true);
+                handleCheckout();
               }}
             >
               Pay Now
